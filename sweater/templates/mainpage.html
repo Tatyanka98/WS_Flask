@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    
+    {% include "head.html" %}
+    <link rel='stylesheet' href="{{ url_for('static', filename='icons/files/file-icons.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mainpage_style.css') }}"> <!-- Стили страницы -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='text/ql-editor.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css"/> <!-- Слайдер -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.9/dist/katex.min.css" integrity="sha384-r/BYDnh2ViiCwqZt5VJVWuADDic3NnnTIEOv4hOh05nSfB6tjWpKmn1kUHOVkMXc" crossorigin="anonymous"> <!-- Стили для отображения формул -->
+
+    <title>Главная</title>
+</head>
+
+<body onload="getNewNews();">
+    <!-- Навигационное меню -->
+    {% include "asidemenu.html" %}
+    
+    <section class="mainContainer column">
+
+        <div class='row g24'>
+            <h1>Главная</h1>
+            {% if current_user.permission != 'student' %}
+            <button class='secondaryButton' onclick="open_form('#newEventForm')">Добавить событие</button>
+            {% endif %}
+        </div>
+
+        <!-- Виджеты -->
+        <section id='widgets' class='row g16'>
+
+            <!-- Виджет "Календарь" -->
+            
+            <div id="eventsWidget">
+                
+                <div id="eventCarousel" class="carousel">
+                    {% for event in events %}
+                    <div class="carousel__slide event">
+                        <img src="{{ event.image.url }}" class='event__banner'>
+                        <div class="event__content column g16">
+                            <p class="event__tag">Событие</p>
+                            <h2 class="event__title">{{ event.title }}</h2>
+                            <p class="event__text">{{ event.content }}</p>
+                            <button class="event__button" onclick="location.href=`{{ url_for('post_page', id=event.id) }}`">Подробнее</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Виджет "Расписание" -->
+            <div id="scheduleWidget">
+                <div class='courseList column scrollbar'>
+                    {% for course in courses %}
+                    <div class='course row g16' onclick="location.href=`{{ url_for('course_page', id=course.id) }}`">
+                        <img src="{{ course.type.image.url }}" class='course__illustration'/>
+                        <div class="course__info column g4">
+                            <p class='course__title'>{{ course }}</p>
+                            <p class='course__teacher'>
+                                {{ course.teacher.surname }} 
+                                {{ course.teacher.name }}.
+                            </p>
+                        </div>
+                        <div class="row g4" style='margin-left: auto'>
+                                {% for week_day in week_days.split %}
+            
+                                        {% if shedule %}
+                                        <div class="lesson column">
+                                            <p class="lesson__day">{{ week_day }}</p>
+                                            <p class='lesson__time'>{{ shedule.time }}</p>
+                                        </div>
+                                        {% else %}
+                                        <div class="lesson column inactive">
+                                            <p class="lesson__day">{{ week_day }}</p>
+                                        </div>
+                                        {% endif %}
+            
+                                {% endfor %}
+                        </div>
+                        <svg viewBox="0 0 256 512">
+                            <path d="M24.707 38.101L4.908 57.899c-4.686 4.686-4.686 12.284 0 16.971L185.607 256 4.908 437.13c-4.686 4.686-4.686 12.284 0 16.971L24.707 473.9c4.686 4.686 12.284 4.686 16.971 0l209.414-209.414c4.686-4.686 4.686-12.284 0-16.971L41.678 38.101c-4.687-4.687-12.285-4.687-16.971 0z"></path>
+                        </svg>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        
+        <!-- Новости -->
+        <section id='news' class='column g24'>
+
+            <div class='row g24'>
+                <h1>Новости</h1>
+                {% if user.permission != 'Ученик' %}
+                <button class='secondaryButton' onclick="open_form('#newNewsItemForm')">Добавить новость</button>
+                {% endif %}
+            </div>
+
+            <!-- Блок новостей -->
+            <div id='news__container' class='newsContainer'>
+                <!-- Спавн новсотей :\ -->
+            </div>
+            
+            <button onclick="getNewNews()" class='primaryButton' style='margin: 0 auto' id='more'>Больше новостей</button>
+            {% include "newcreationform.html" %}
+            {% include "eventcreationform.html" %}
+        </section>
+    </section>
+    
+    <div class="alertsContainer column" id='alertsContainer'></div>
+    
+    <script src="{{ url_for('static', filename='scripts/mainpage_scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/newscore_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/eventform_script.js') }}"></script>
+    
+    <!-- Сама панель инструментов -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="{{ url_for('static', filename='text/options.js') }}"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+
+    <script> initQuill('#event-editor') </script>
+    
+    <script>
+
+    </script>
+    <script>
+        const myCarousel = new Carousel(document.querySelector("#eventCarousel"), {
+            Dots: true,
+            infinite: true,
+            friction: 0.9,
+        });
+        setInterval(() => myCarousel.slideTo(myCarousel.pageIndex + 1), 10000)
+    </script>
+</body>
+</html>
